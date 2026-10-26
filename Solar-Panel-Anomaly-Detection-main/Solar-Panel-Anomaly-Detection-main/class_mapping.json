@@ -1,0 +1,106 @@
+{
+    "class_to_idx": {
+        "Cell": 0,
+        "Cell-Multi": 1,
+        "Cracking": 2,
+        "Diode": 3,
+        "Diode-Multi": 4,
+        "Hot-Spot": 5,
+        "Hot-Spot-Multi": 6,
+        "No-Anomaly": 7,
+        "Offline-Module": 8,
+        "Shadowing": 9,
+        "Soiling": 10,
+        "Vegetation": 11
+    },
+    "idx_to_class": {
+        "0": "Cell",
+        "1": "Cell-Multi",
+        "2": "Cracking",
+        "3": "Diode",
+        "4": "Diode-Multi",
+        "5": "Hot-Spot",
+        "6": "Hot-Spot-Multi",
+        "7": "No-Anomaly",
+        "8": "Offline-Module",
+        "9": "Shadowing",
+        "10": "Soiling",
+        "11": "Vegetation"
+    },
+    "class_weights": {
+        "0": 0.8877052818464269,
+        "1": 1.2944983818770226,
+        "2": 1.7730496453900708,
+        "3": 1.1120378092855157,
+        "4": 9.523809523809524,
+        "5": 6.700167504187605,
+        "6": 6.768189509306261,
+        "7": 0.16666666666666666,
+        "8": 2.014098690835851,
+        "9": 1.5779092702169626,
+        "10": 8.1799591002045,
+        "11": 1.0170353419781337
+    },
+    "priority_info": {
+        "Offline-Module": {
+            "rank": 1,
+            "level": "Critical",
+            "action": "Immediate Electrical Inspection (100% Loss)"
+        },
+        "Diode-Multi": {
+            "rank": 1,
+            "level": "Critical",
+            "action": "Replace Bypass Diodes (66% Module Loss)"
+        },
+        "Diode": {
+            "rank": 2,
+            "level": "High",
+            "action": "Replace Bypass Diode (33% Module Loss)"
+        },
+        "Cracking": {
+            "rank": 2,
+            "level": "High",
+            "action": "Physical Inspection / Structural Damage"
+        },
+        "Cell-Multi": {
+            "rank": 3,
+            "level": "Medium",
+            "action": "Thermal Check on Multiple Cells"
+        },
+        "Hot-Spot-Multi": {
+            "rank": 3,
+            "level": "Medium",
+            "action": "Thin-Film Multi Hot-Spot Inspection"
+        },
+        "Cell": {
+            "rank": 3,
+            "level": "Medium",
+            "action": "Monitor Single Cell Hot-Spot"
+        },
+        "Hot-Spot": {
+            "rank": 3,
+            "level": "Medium",
+            "action": "Monitor Thin-Film Hot-Spot"
+        },
+        "Vegetation": {
+            "rank": 4,
+            "level": "Low",
+            "action": "Trim Vegetation / Clear Shading"
+        },
+        "Shadowing": {
+            "rank": 4,
+            "level": "Low",
+            "action": "Check Obstacle / Row Spacing Shadow"
+        },
+        "Soiling": {
+            "rank": 4,
+            "level": "Cleaning",
+            "action": "Schedule Washing (Link with Part 1 Model)"
+        },
+        "No-Anomaly": {
+            "rank": 5,
+            "level": "Normal",
+            "action": "No Action Required"
+        }
+    }
+}
