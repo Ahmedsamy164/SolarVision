@@ -341,20 +341,3 @@ SolarVision brings together two separately developed pipelines, which `solarvisi
 | Thermal solar-panel classification | `Solar-Panel-Anomaly-Detection-main/` | CNN classifier for 12 thermal conditions, evaluation plots, model exports (Keras/H5/ONNX), MLflow logging. |
 
 The original notebooks, `api.py` and `app_streamlit.py` are kept for reproducibility and are not needed to run the unified app. The repeated folder names come from extracting the original project archives; if they are ever flattened, update the paths in `solarvision_app.py`, the `Dockerfile` and the notebooks, and test again.
-
-## Contributing
-
-1. Create a branch for your change, for example `feature/eda` or `fix/forecast-api`.
-2. Make a focused change and test the affected workflow (for the unified app, also rebuild and check the Docker image).
-3. Commit with a descriptive message.
-4. Open a Pull Request to `main` and ask a teammate to review it before merging.
-
-Keep the original notebook workflows available for reproducibility. Do not commit virtual environments, credentials, or secrets. Document dependency versions and dataset licensing before redistributing datasets or model artifacts. Large datasets and generated files may be better managed with Git LFS or DVC.
-
-## Team
-
-Add the project members and their technical responsibilities here before the final submission.
-
-## Project status
-
-The unified application, `requirements.txt` and `Dockerfile` are in place. The combined maintenance recommendation has not been validated against a matched real-world dataset, and the models are not retrained or re-benchmarked by this interface. Complete repository cleanup and reproducibility checks before describing the project as production-ready.
