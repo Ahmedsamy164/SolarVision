@@ -95,7 +95,8 @@ All architectures were optimized using the **Adam** optimizer and `categorical_c
 ---
 
 ## 8. Setup, MLflow Logging & ONNX Inference
-
+## MLFlow Demo Link : 
+(https://drive.google.com/file/d/1FEfPMLTOPy6PVLLX93bFNLKhMitycY0Y/view)
 ### Environment Installation
 ```bash
 git clone [https://github.com/RanaElmaghraby/Solar-Panel-Anomaly-Detection.git](https://github.com/RanaElmaghraby/Solar-Panel-Anomaly-Detection.git)
