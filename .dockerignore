@@ -1,0 +1,18 @@
+# Keep the build context small: none of this is needed to RUN the app.
+# (**/ makes each pattern match inside the nested module folders too)
+.git
+.devcontainer
+**/.venv
+**/venv
+**/__pycache__
+**/*.pyc
+**/*.ipynb
+**/*.mp4
+**/*.png
+**/data.zip
+**/*.h5
+**/*.onnx
+**/mlruns
+**/Laghouat_2022_final.csv
+**/processed_data
+**/figures
