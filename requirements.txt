@@ -1,11 +1,10 @@
-# Dependencies for the unified SolarVision app (solarvision_app.py).
-# Versions are the ones the app was tested with.
-# scikit-learn MUST stay at 1.9.1: the saved forecast model was trained with it.
-tensorflow-cpu==2.21.0
-keras==3.15.1
-numpy==2.5.4
-pandas==3.1.0
-pillow==13.0.0
-joblib==1.6.0
-scikit-learn==1.9.1
-streamlit==1.66.1
+streamlit
+pandas
+numpy
+pillow
+tensorflow
+joblib
+scikit-learn
+fastapi
+uvicorn[standard]
+python-multipart

@@ -17,6 +17,12 @@ import pandas as pd
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 
+import json
+from io import BytesIO
+
+from PIL import Image
+from fastapi import UploadFile, File
+
 MODEL_DIR = Path("models")
 PRED_PATH = Path("forecast_test_predictions_24h.csv")
 
@@ -239,3 +245,186 @@ def demo_test_summary():
         "mae": float(np.mean(np.abs(df["actual_power_W"] - df["predicted_power_W"]))),
         "columns": list(df.columns),
     }
+
+# =========================
+# Thermal Fault Detection
+# =========================
+
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+
+THERMAL_DIR = (
+    PROJECT_ROOT
+    / "Solar-Panel-Anomaly-Detection-main"
+    / "Solar-Panel-Anomaly-Detection-main"
+)
+
+THERMAL_MODEL_PATH = THERMAL_DIR / "models" / "best_solar_cnn.keras"
+CLASS_MAPPING_PATH = THERMAL_DIR / "class_mapping.json"
+
+_thermal_model = None
+_class_mapping = None
+
+
+def load_thermal_model():
+    """Load the thermal CNN and its class mapping."""
+
+    global _thermal_model, _class_mapping
+
+    if _thermal_model is not None:
+        return
+
+    if not THERMAL_MODEL_PATH.exists():
+        raise FileNotFoundError(
+            f"Thermal model not found: {THERMAL_MODEL_PATH}"
+        )
+
+    if not CLASS_MAPPING_PATH.exists():
+        raise FileNotFoundError(
+            f"Class mapping not found: {CLASS_MAPPING_PATH}"
+        )
+
+    import tensorflow as tf
+
+    _thermal_model = tf.keras.models.load_model(
+        THERMAL_MODEL_PATH,
+        compile=False
+    )
+
+    with open(CLASS_MAPPING_PATH, "r", encoding="utf-8") as f:
+        _class_mapping = json.load(f)
+
+
+def get_class_names():
+    """Return class names ordered by their model output index."""
+
+    mapping = _class_mapping
+
+    if not isinstance(mapping, dict):
+        raise ValueError("class_mapping.json must contain a JSON object.")
+
+    # Actual project format: {"idx_to_class": {"0": "Cell", ...}}
+    if "idx_to_class" in mapping:
+        indexed = mapping["idx_to_class"]
+
+        if isinstance(indexed, dict):
+            try:
+                indexed = {
+                    int(key): value
+                    for key, value in indexed.items()
+                }
+
+                if sorted(indexed.keys()) == list(range(len(indexed))):
+                    return [
+                        str(indexed[i])
+                        for i in range(len(indexed))
+                    ]
+            except (ValueError, TypeError):
+                pass
+
+        raise ValueError("Invalid idx_to_class mapping.")
+
+    # Alternative format: {"class_to_idx": {"Cell": 0, ...}}
+    if "class_to_idx" in mapping:
+        indexed = mapping["class_to_idx"]
+
+        try:
+            indexed = {
+                int(index): name
+                for name, index in indexed.items()
+            }
+
+            if sorted(indexed.keys()) == list(range(len(indexed))):
+                return [
+                    str(indexed[i])
+                    for i in range(len(indexed))
+                ]
+        except (ValueError, TypeError):
+            pass
+
+        raise ValueError("Invalid class_to_idx mapping.")
+
+    raise ValueError(
+        "Could not find idx_to_class or class_to_idx in class_mapping.json."
+    )
+
+
+@app.post("/thermal/predict")
+async def predict_thermal(file: UploadFile = File(...)):
+    """
+    Classify an uploaded thermal solar-panel image.
+    """
+
+    if file.content_type and not file.content_type.startswith("image/"):
+        raise HTTPException(
+            status_code=415,
+            detail="Please upload an image file."
+        )
+
+    try:
+        image_bytes = await file.read()
+
+        if not image_bytes:
+            raise HTTPException(
+                status_code=400,
+                detail="The uploaded file is empty."
+            )
+
+        image = Image.open(BytesIO(image_bytes)).convert("RGB")
+
+        load_thermal_model()
+
+        # Match the CNN's expected input dimensions.
+        input_shape = _thermal_model.input_shape
+
+        if isinstance(input_shape, list):
+            raise ValueError(
+                "This endpoint expects a model with one image input."
+            )
+
+        height, width = input_shape[1], input_shape[2]
+
+        if height is None or width is None:
+            raise ValueError(
+                "The model does not specify fixed image dimensions."
+            )
+
+        image = image.resize((int(width), int(height)))
+
+        # Match the app's image normalization.
+        image_array = np.asarray(image, dtype=np.float32) / 255.0
+        image_array = np.expand_dims(image_array, axis=0)
+
+        predictions = _thermal_model.predict(
+            image_array,
+            verbose=0
+        )[0]
+
+        class_names = get_class_names()
+
+        if len(class_names) != len(predictions):
+            raise ValueError(
+                f"Class mapping contains {len(class_names)} classes, "
+                f"but the model returned {len(predictions)} scores."
+            )
+
+        predicted_index = int(np.argmax(predictions))
+
+        return {
+            "filename": file.filename,
+            "predicted_class": class_names[predicted_index],
+            "confidence": float(predictions[predicted_index]),
+            "class_scores": {
+                class_names[i]: float(score)
+                for i, score in enumerate(predictions)
+            }
+        }
+
+    except HTTPException:
+        raise
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Thermal prediction failed: {str(e)}"
+        )
+    
